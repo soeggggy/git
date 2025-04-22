@@ -12,12 +12,12 @@ def is_port_in_use(port):
 # Get the current workflow name from environment variable
 current_workflow = os.environ.get('REPL_WORKFLOW', '')
 
-# If port 5000 is in use AND we're in run_miku_bot workflow,
+# If we're in run_miku_bot workflow (but not forced web interface),
 # run the standalone bot without importing Flask
-if current_workflow == 'run_miku_bot' or is_port_in_use(5000):
+if current_workflow == 'run_miku_bot' and not os.environ.get('FORCE_WEB_INTERFACE'):
     # Only import what we need for the bot
     print("==================================================")
-    print("Detected run_miku_bot workflow or port 5000 in use")
+    print("Detected run_miku_bot workflow")
     print("Running bot in standalone mode without web interface")
     print("==================================================")
     
