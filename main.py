@@ -45,6 +45,7 @@ def run_bot():
     """Run the Telegram bot in a separate thread"""
     setup_bot()
 
+# Only start the bot when running directly, not when imported by gunicorn
 if __name__ == '__main__':
     # Start the bot in a separate thread
     bot_thread = threading.Thread(target=run_bot)
@@ -53,8 +54,3 @@ if __name__ == '__main__':
     
     # Run the Flask app
     app.run(host='0.0.0.0', port=5000)
-else:
-    # Create a thread for the bot when imported as a module (for gunicorn)
-    bot_thread = threading.Thread(target=run_bot)
-    bot_thread.daemon = True
-    bot_thread.start()
