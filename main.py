@@ -164,9 +164,10 @@ def main():
         print("Starting BOT in standalone mode...")
         print("=========================================")
         
-        # Import and run the bot in standalone mode without web interface
-        import standalone_bot
-        standalone_bot.run_standalone()
+        # IMPORTANT: Skip Flask completely and just run the bot
+        # This avoids any port conflicts with the web interface
+        from bot_runner import run_standalone_bot
+        run_standalone_bot()
         return
     
     # If explicitly asked to run bot_only from command line arg
