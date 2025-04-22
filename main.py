@@ -148,7 +148,7 @@ def test_reddit_post():
     """Redirect to the new endpoint structure for Reddit posts"""
     return test_post('reddit')
 
-def run_bot():
+def start_bot_thread():
     """Run the Telegram bot in a separate thread"""
     setup_bot()
 
@@ -161,12 +161,12 @@ def main():
     if current_workflow == 'run_miku_bot':
         print("=========================================")
         print("Detected run_miku_bot workflow")
-        print("Starting BOT ONLY in standalone mode...")
+        print("Starting BOT with port conflict detection...")
         print("=========================================")
         
-        # Import and run the completely standalone bot script
-        import standalone_bot
-        standalone_bot.run_standalone()
+        # Import and run the special runner with port conflict detection
+        import run_bot
+        run_bot.run_standalone_bot()
         return
     
     # If explicitly asked to run bot_only from command line arg
@@ -183,7 +183,7 @@ def main():
         print("Starting in COMBINED mode (web interface + bot)...")
         
         # Start the bot in a separate thread
-        bot_thread = threading.Thread(target=run_bot)
+        bot_thread = threading.Thread(target=start_bot_thread)
         bot_thread.daemon = True
         bot_thread.start()
         

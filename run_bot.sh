@@ -1,3 +1,3 @@
 #!/bin/bash
-# Run the bot in completely standalone mode
-python standalone_bot.py
+# Run the bot with special port conflict handling
+python run_bot.py
