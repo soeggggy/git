@@ -155,22 +155,38 @@ def run_bot():
 if __name__ == '__main__':
     import sys
     import os
+    import time
     
-    # Detect if we're running from the run_miku_bot workflow
-    # The workflow name is set in the environment by Replit
-    current_workflow = os.environ.get('REPL_WORKFLOW')
+    # Get the current workflow name from environment variable
+    current_workflow = os.environ.get('REPL_WORKFLOW', '')
     
-    # If we're explicitly asked to run bot_only OR we're in the run_miku_bot workflow
-    if (len(sys.argv) > 1 and sys.argv[1] == 'bot_only') or current_workflow == 'run_miku_bot':
-        # Just run the bot without the web server (no Flask)
-        print("Starting Miku bot in standalone mode...")
-        print(f"Running from workflow: {current_workflow}")
+    # Special handling for the run_miku_bot workflow
+    if current_workflow == 'run_miku_bot':
+        print(f"=========================================")
+        print(f"Detected run_miku_bot workflow")
+        print(f"Starting BOT ONLY in standalone mode...")
+        print(f"=========================================")
         
-        # Import here to avoid circular imports
-        from start_bot import main as start_bot_main
-        start_bot_main()
+        # Import and run the standalone bot version
+        import bot_only
+        
+        # This script will now exit, as bot_only has its own main loop
+        sys.exit(0)
+    
+    # If explicitly asked to run bot_only from command line arg
+    elif len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
+        print("Starting Miku bot in standalone mode via command line argument...")
+        
+        # Import the dedicated bot script
+        import bot_only
+        
+        # This script will now exit, as bot_only has its own main loop
+        sys.exit(0)
+    
     else:
         # Normal mode: start both the bot thread and Flask app
+        print("Starting in COMBINED mode (web interface + bot)...")
+        
         # Start the bot in a separate thread
         bot_thread = threading.Thread(target=run_bot)
         bot_thread.daemon = True
