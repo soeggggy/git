@@ -157,7 +157,7 @@ if __name__ == '__main__':
     
     # Check if we're just running the bot without the web server
     if len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
-        # Just run the bot without the web server
+        # Just run the bot without the web server (no Flask)
         print("Starting Miku bot in standalone mode...")
         run_bot()
         print("Bot is running. Press Ctrl+C to stop.")
@@ -167,6 +167,7 @@ if __name__ == '__main__':
         while True:
             time.sleep(1)
     else:
+        # Normal mode: start both the bot thread and Flask app
         # Start the bot in a separate thread
         bot_thread = threading.Thread(target=run_bot)
         bot_thread.daemon = True
