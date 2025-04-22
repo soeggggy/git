@@ -21,10 +21,16 @@ def index():
 @app.route('/status')
 def status():
     """API endpoint to check bot status"""
+    from config import DEFAULT_CHANNEL
+    channel = DEFAULT_CHANNEL
+    if channel and not channel.startswith('@'):
+        channel = '@' + channel
+        
     return jsonify({
         "status": "running",
         "bot_name": "Nakano Miku Bot",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "channel": channel
     })
 
 def run_bot():

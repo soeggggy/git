@@ -41,13 +41,20 @@ def send_post(context, content: dict):
             logger.error("Could not get bot instance!")
             return
             
-        # Send the image with caption
-        bot.send_photo(
-            chat_id=channel,
-            photo=content['image_url'],
-            caption=full_caption
-        )
-        logger.info(f"Posted content: {content['image_url'][:30]}...")
+        try:
+            # Send the image with caption
+            bot.send_photo(
+                chat_id=channel,
+                photo=content['image_url'],
+                caption=full_caption
+            )
+            logger.info(f"Successfully posted content to {channel}: {content['image_url'][:30]}...")
+        except Exception as e:
+            if "Forbidden" in str(e) and "bot is not a member" in str(e):
+                logger.error(f"Error: Bot doesn't have permission to post to {channel}. "
+                            f"Make sure to add the bot as an administrator to this channel with 'Post Messages' permission.")
+            else:
+                logger.error(f"Error sending photo: {e}")
         
     except Exception as e:
         logger.error(f"Error sending post: {e}")

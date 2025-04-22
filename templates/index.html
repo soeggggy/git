@@ -112,6 +112,45 @@
                 <li><strong>/start</strong> - Subscribe to Miku updates</li>
             </ul>
         </div>
+        
+        <div class="miku-card">
+            <h2>Troubleshooting</h2>
+            <div class="info-item">
+                <h4>Bot Can't Post to Channel</h4>
+                <p>For the bot to post to your Telegram channel, you need to:</p>
+                <ol>
+                    <li>Add your bot as an administrator to your channel</li>
+                    <li>Make sure the bot has the "Post Messages" permission</li>
+                </ol>
+                <p><strong>Note:</strong> The bot needs to be an administrator to post to the channel, not just a member.</p>
+            </div>
+            <div class="info-item">
+                <h4>Reddit Content Not Working</h4>
+                <p>To enable Reddit content posting, you'll need to:</p>
+                <ol>
+                    <li>Create a Reddit application at <a href="https://www.reddit.com/prefs/apps" target="_blank">reddit.com/prefs/apps</a></li>
+                    <li>Add these environment variables:
+                        <ul>
+                            <li>REDDIT_CLIENT_ID</li>
+                            <li>REDDIT_CLIENT_SECRET</li>
+                            <li>REDDIT_USER_AGENT (optional, defaults to "MikuBot/1.0")</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="miku-card">
+            <h2>Setup Guide</h2>
+            <p>For the bot to work properly:</p>
+            <ol>
+                <li>Add your bot to your Telegram channel as an <strong>administrator</strong></li>
+                <li>Give the bot <strong>post messages</strong> permission</li>
+                <li>If your channel is private, you may need to use the channel's ID instead of username</li>
+            </ol>
+            <p>Current channel: <strong id="channel-name">Loading...</strong></p>
+            <p class="text-warning"><small>Note: If you're seeing errors about the bot not having permission, please follow the steps above.</small></p>
+        </div>
     </div>
 
     <script>
