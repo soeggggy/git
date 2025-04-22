@@ -1,20 +1,9 @@
 import logging
 from telegram import Update
 from config import DEFAULT_CHANNEL
+import sys
 
 logger = logging.getLogger(__name__)
-
-def start_command(update, context):
-    """
-    Handle the /start command.
-    Sends a welcome message and instructions to the user.
-    """
-    update.message.reply_text(
-        "Hello! I'm the Nakano Miku Bot! 💙\n\n"
-        "I'll be posting Miku content regularly in this chat.\n"
-        "Facts and images every 30 minutes, and extra images every 15 minutes!\n\n"
-        "Just sit back and enjoy the Miku content! 🎧"
-    )
 
 def send_post(context, content: dict):
     """
@@ -25,10 +14,15 @@ def send_post(context, content: dict):
         content: Dict containing 'image_url', 'caption', and 'source'
     """
     try:
-        chat_id = DEFAULT_CHANNEL or context.job.chat_id
-        if not chat_id:
-            logger.error("No chat ID provided for posting!")
+        # Use DEFAULT_CHANNEL from config as channel username
+        channel = DEFAULT_CHANNEL
+        if not channel:
+            logger.error("No channel username provided for posting! Set TELEGRAM_CHANNEL_USERNAME in environment variables.")
             return
+            
+        # Make sure the channel name starts with @ if it doesn't already
+        if not channel.startswith('@'):
+            channel = '@' + channel
             
         # Add hashtags and source attribution to the caption
         full_caption = f"{content['caption']}\n\n"
@@ -38,9 +32,18 @@ def send_post(context, content: dict):
             
         full_caption += "#NakanoMiku #Miku #GotoubunNoHanayome #QuintessentialQuintuplets"
         
+        # Get bot instance and send the photo
+        bot = None
+        if hasattr(context, 'bot'):
+            bot = context.bot
+            
+        if not bot:
+            logger.error("Could not get bot instance!")
+            return
+            
         # Send the image with caption
-        context.bot.send_photo(
-            chat_id=chat_id,
+        bot.send_photo(
+            chat_id=channel,
             photo=content['image_url'],
             caption=full_caption
         )

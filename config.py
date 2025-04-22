@@ -1,7 +1,7 @@
 import os
 
 # Telegram bot configuration
-DEFAULT_CHANNEL = os.getenv("TELEGRAM_CHANNEL_ID", "")
+DEFAULT_CHANNEL = os.getenv("TELEGRAM_CHANNEL_USERNAME", "")
 
 # Reddit API configuration
 REDDIT_CLIENT_ID = os.getenv("REDDIT_CLIENT_ID", "")
