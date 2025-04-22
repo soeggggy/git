@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nakano Miku Bot Status</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a2e;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .miku-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .miku-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .miku-card {
+            background-color: rgba(30, 41, 59, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .status-running {
+            background-color: #2ecc71;
+            box-shadow: 0 0 10px #2ecc71;
+        }
+        .status-stopped {
+            background-color: #e74c3c;
+            box-shadow: 0 0 10px #e74c3c;
+        }
+        .miku-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .info-item {
+            flex: 1 1 200px;
+            background-color: rgba(44, 62, 80, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .miku-image {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .miku-image img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container miku-container">
+        <div class="miku-header">
+            <h1>Nakano Miku Telegram Bot 💙</h1>
+            <p>Autonomous bot that posts Miku content at regular intervals</p>
+        </div>
+
+        <div class="miku-card">
+            <h2>Bot Status</h2>
+            <p>
+                <span class="status-indicator status-running" id="status-dot"></span>
+                <span id="status-text">Running</span>
+            </p>
+            <div class="miku-info">
+                <div class="info-item">
+                    <h4>Post Intervals</h4>
+                    <ul>
+                        <li>Facts: Every 30 minutes</li>
+                        <li>Images: Every 15 minutes</li>
+                        <li>Reddit content: Every hour</li>
+                    </ul>
+                </div>
+                <div class="info-item">
+                    <h4>Content Sources</h4>
+                    <ul>
+                        <li>waifu.im API</li>
+                        <li>Safebooru</li>
+                        <li>Reddit</li>
+                        <li>waifu.pics (fallback)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="miku-card">
+            <h2>About Nakano Miku</h2>
+            <p>Nakano Miku is the third sister among the quintuplets in "The Quintessential Quintuplets" (Gotoubun no Hanayome). She's known for her blue headphones, love of Japanese history, and her initially shy but determined personality.</p>
+            <div class="miku-image">
+                <img src="https://i.imgur.com/JqYjTmh.jpg" alt="Nakano Miku" id="miku-image">
+            </div>
+        </div>
+
+        <div class="miku-card">
+            <h2>Commands</h2>
+            <ul>
+                <li><strong>/start</strong> - Subscribe to Miku updates</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Check status periodically
+        function checkStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    const statusDot = document.getElementById('status-dot');
+                    const statusText = document.getElementById('status-text');
+                    
+                    if (data.status === 'running') {
+                        statusDot.className = 'status-indicator status-running';
+                        statusText.textContent = 'Running';
+                    } else {
+                        statusDot.className = 'status-indicator status-stopped';
+                        statusText.textContent = 'Stopped';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                    const statusDot = document.getElementById('status-dot');
+                    const statusText = document.getElementById('status-text');
+                    statusDot.className = 'status-indicator status-stopped';
+                    statusText.textContent = 'Error checking status';
+                });
+        }
+
+        // Check status immediately and then every 10 seconds
+        checkStatus();
+        setInterval(checkStatus, 10000);
+    </script>
+</body>
+</html>
