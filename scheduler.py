@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 from telegram.ext import Updater
 from api_clients import get_random_miku_image, fetch_reddit_post
 from facts import get_random_miku_fact, get_random_miku_caption
@@ -8,6 +9,7 @@ from storage import add_to_history, is_in_history
 from config import (
     MAIN_POST_INTERVAL, IMAGE_POST_INTERVAL, REDDIT_POST_INTERVAL
 )
+from reddit_tracker import check_for_new_posts, get_batch_posts, initialize_last_post_ids
 
 logger = logging.getLogger(__name__)
 
@@ -106,35 +108,57 @@ def post_miku_image(context):
 def post_reddit_miku(context):
     """
     Scheduled job to post Miku content from Reddit.
+    Gets a batch of posts every 10 minutes.
     """
     try:
-        # Fetch a Miku post from Reddit
-        reddit_post = fetch_reddit_post()
-        if not reddit_post:
-            logger.error("Failed to get a Reddit Miku post")
+        # Get a batch of Reddit posts (up to 3 at a time)
+        batch_posts = get_batch_posts(max_posts=3)
+        
+        if not batch_posts:
+            logger.info("No new Reddit posts to share at this time")
             return
             
-        image_url = reddit_post["image_url"]
-        
-        # Check if this image URL has been used before
-        max_attempts = 5
-        image_attempts = 0
-        while is_in_history("urls", image_url) and image_attempts < max_attempts:
-            reddit_post = fetch_reddit_post()
-            if not reddit_post:
-                logger.error("Failed to get a unique Reddit Miku post after multiple attempts")
-                break
-            image_url = reddit_post["image_url"]
-            image_attempts += 1
+        for post in batch_posts:
+            # Send the post
+            send_post(context, post)
             
-        # Send the post
-        send_post(context, reddit_post)
+            # Record used content in history
+            add_to_history("urls", post["image_url"])
+            
+            # Small delay between posts to avoid flooding
+            time.sleep(1)
         
-        # Record used content in history
-        add_to_history("urls", image_url)
+        logger.info(f"Posted {len(batch_posts)} Reddit posts in batch")
         
     except Exception as e:
         logger.error(f"Error in post_reddit_miku: {e}")
+
+def check_new_reddit_posts(context):
+    """
+    Frequently checks for new Reddit posts and posts them immediately.
+    This allows us to post new content as soon as it appears.
+    """
+    try:
+        # Check for new posts
+        new_posts = check_for_new_posts()
+        
+        if not new_posts:
+            return
+        
+        logger.info(f"Found {len(new_posts)} new Reddit posts to share immediately")
+        
+        for post in new_posts:
+            # Send the post
+            send_post(context, post)
+            
+            # Record used content in history
+            add_to_history("urls", post["image_url"])
+            
+            # Small delay between posts to avoid flooding
+            time.sleep(1)
+        
+    except Exception as e:
+        logger.error(f"Error in check_new_reddit_posts: {e}")
 
 def setup_scheduler(updater: Updater):
     """
@@ -144,6 +168,9 @@ def setup_scheduler(updater: Updater):
         updater: The Telegram bot updater
     """
     job_queue = updater.job_queue
+    
+    # Initialize Reddit tracking
+    initialize_last_post_ids()
     
     # Schedule the main posts every 30 minutes
     job_queue.run_repeating(
@@ -159,11 +186,18 @@ def setup_scheduler(updater: Updater):
         first=IMAGE_POST_INTERVAL // 2  # Start halfway between main posts
     )
     
-    # Schedule Reddit posts every hour
+    # Schedule Reddit batch posts every 10 minutes
     job_queue.run_repeating(
         post_reddit_miku,
-        interval=REDDIT_POST_INTERVAL,
-        first=REDDIT_POST_INTERVAL // 4  # Start after 15 minutes
+        interval=600,  # 10 minutes in seconds
+        first=60  # Start after 1 minute
+    )
+    
+    # Schedule frequent checks for new Reddit posts (every 2 minutes)
+    job_queue.run_repeating(
+        check_new_reddit_posts,
+        interval=120,  # 2 minutes in seconds
+        first=30  # Start after 30 seconds
     )
     
     logger.info("Scheduler set up successfully")
