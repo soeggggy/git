@@ -29,13 +29,25 @@ def main():
     
     # Check if port 5000 is already in use (likely by the web app)
     if is_port_in_use(5000):
-        print("Port 5000 is already in use. Running bot in standalone mode...")
+        print("Port 5000 is already in use")
+        print("Launching web dashboard on port 8080 instead...")
+        
+        try:
+            # Import and run the web dashboard on a different port
+            import time
+            import web_dashboard
+            web_dashboard.app.run(host='0.0.0.0', port=8080)
+        except ImportError:
+            print("Web dashboard not available. Running in monitor mode...")
+            while True:
+                print("Monitoring... Bot is running in another workflow.")
+                time.sleep(30)
     else:
         print("Port 5000 is available, but still using standalone mode for consistency...")
-    
-    # ALWAYS run in standalone mode to avoid conflicts
-    print("Starting Miku bot in standalone mode...")
-    run_standalone()
+        
+        # ALWAYS run in standalone mode to avoid conflicts
+        print("Starting Miku bot in standalone mode...")
+        run_standalone()
 
 if __name__ == "__main__":
     main()
