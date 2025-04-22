@@ -164,16 +164,18 @@ def main():
         print("Starting BOT ONLY in standalone mode...")
         print("=========================================")
         
-        from bot_runner import run_standalone_bot
-        run_standalone_bot()
+        # Import and run the completely standalone bot script
+        import standalone_bot
+        standalone_bot.run_standalone()
         return
     
     # If explicitly asked to run bot_only from command line arg
     elif len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
         print("Starting Miku bot in standalone mode via command line argument...")
         
-        from bot_runner import run_standalone_bot
-        run_standalone_bot()
+        # Import and run the completely standalone bot script
+        import standalone_bot
+        standalone_bot.run_standalone()
         return
     
     else:
