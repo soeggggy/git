@@ -161,6 +161,7 @@
                 .then(data => {
                     const statusDot = document.getElementById('status-dot');
                     const statusText = document.getElementById('status-text');
+                    const channelName = document.getElementById('channel-name');
                     
                     if (data.status === 'running') {
                         statusDot.className = 'status-indicator status-running';
@@ -168,6 +169,11 @@
                     } else {
                         statusDot.className = 'status-indicator status-stopped';
                         statusText.textContent = 'Stopped';
+                    }
+                    
+                    // Update channel name if available
+                    if (data.channel) {
+                        channelName.textContent = data.channel;
                     }
                 })
                 .catch(error => {
