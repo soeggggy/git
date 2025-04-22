@@ -39,6 +39,10 @@ logging.basicConfig(
 # Create Flask app
 app = Flask(__name__)
 
+# Add start time for uptime tracking
+import time
+app.config['START_TIME'] = time.time()
+
 @app.route('/')
 def index():
     """Main page to show bot status"""
@@ -48,23 +52,30 @@ def index():
 def status():
     """API endpoint to check bot status"""
     import os
+    import time
     from config import DEFAULT_CHANNEL, MAIN_POST_INTERVAL, IMAGE_POST_INTERVAL, REDDIT_POST_INTERVAL
     
     channel = DEFAULT_CHANNEL
     if channel and not channel.startswith('@'):
         channel = '@' + channel
         
+    # Current uptime in seconds
+    uptime = int(time.time() - app.config.get('START_TIME', time.time()))
+    
     return jsonify({
         "status": "running",
         "bot_name": "Nakano Miku Bot",
         "version": "1.0.0",
         "channel": channel,
+        "uptime_seconds": uptime,
+        "uptime_human": f"{uptime // 86400}d {(uptime % 86400) // 3600}h {(uptime % 3600) // 60}m {uptime % 60}s",
         "intervals": {
             "main_fact_interval_minutes": MAIN_POST_INTERVAL // 60,
             "image_interval_minutes": IMAGE_POST_INTERVAL // 60,
             "reddit_interval_minutes": REDDIT_POST_INTERVAL // 60
         },
-        "reddit_enabled": bool(os.getenv("REDDIT_CLIENT_ID") and os.getenv("REDDIT_CLIENT_SECRET"))
+        "reddit_enabled": bool(os.getenv("REDDIT_CLIENT_ID") and os.getenv("REDDIT_CLIENT_SECRET")),
+        "keepalive": True
     })
     
 @app.route('/api/test/post/<post_type>', methods=['GET'])
