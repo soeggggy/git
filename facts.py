@@ -2,6 +2,33 @@ import random
 
 # Collection of Nakano Miku facts and captions
 MIKU_FACTS = [
+    # Personality traits
+    "Miku is known for being the most soft-spoken and reserved of the quintuplets.",
+    "Despite her shy nature, Miku has shown she can be quite stubborn when determined.",
+    "Miku's development from shy to more confident is a fan-favorite character arc.",
+    "Miku tends to overthink situations, especially those involving Fuutarou.",
+    "She has the most noticeable pout face among the quintuplets, which fans adore.",
+    
+    # Relationships
+    "Miku and Nino have a complex relationship, but they deeply care for each other.",
+    "Miku and Yotsuba share a special bond as the quieter sisters among the quintuplets.",
+    "Miku was the first sister to recognize Fuutarou when he changed his hair color.",
+    "Miku and Ichika have a tender relationship despite later complications.",
+    "Miku tends to be protective of Yotsuba, the fourth sister.",
+    
+    # Appearance
+    "Miku's casual outfit typically includes a sweater, skirt, and thigh-high socks.",
+    "Miku's hairstyle features a side bang that often partially covers her face.",
+    "Unlike her sisters, Miku rarely changes her hairstyle throughout the series.",
+    "Miku's blue headphones match her eye color, creating her signature look.",
+    "Miku is often drawn with a slightly more subdued expression than her sisters.",
+    
+    # Interest in History
+    "Miku can recite the names and achievements of over 30 Sengoku-era warlords.",
+    "Miku has collected several replicas of historical Japanese swords.",
+    "Miku has visited numerous historical sites in Japan as seen in flashbacks.",
+    "Her knowledge of the Sengoku period has helped the sisters in school projects.",
+    "Miku keeps a special notebook where she writes historical facts she learns.",
     "Nakano Miku is one of the quintuplet sisters in 'The Quintessential Quintuplets' (Gotoubun no Hanayome).",
     "Miku is the third sister among the Nakano quintuplets.",
     "Miku's favorite subject is History, especially Japanese History.",
@@ -56,6 +83,33 @@ MIKU_FACTS = [
 
 # Collection of cute/positive captions for image posts
 MIKU_CAPTIONS = [
+    # Reference to her interests
+    "History lessons with Professor Miku when? 📚💙",
+    "POV: You just asked Miku about the Sengoku period 📜",
+    "Caught Miku reading about Date Masamune again! 📚",
+    "When the history textbook mentions your favorite warlord 👀",
+    "Miku's headphones probably playing historical audiobooks 🎧",
+    
+    # Character traits
+    "That special moment when shy Miku becomes confident 💪",
+    "The duality of Miku: shy around people, passionate about history 💙",
+    "Miku's pout is a national treasure 😤💙",
+    "Behind those bangs is the cutest quintuplet 💙",
+    "When Miku gets determined, there's no stopping her 🔥",
+    
+    # Sister interactions
+    "Miku secretly helping her sisters study history 📚",
+    "When Miku successfully disguises as one of her sisters 🕵️‍♀️",
+    "Miku and Yotsuba moments are the sweetest 💙💚",
+    "The special bond between Miku and her sisters is everything 💕",
+    "Just Miku being the most supportive sister 💙",
+    
+    # Series moments
+    "The bread scene with Miku was top tier anime content 🍞",
+    "Still thinking about that confession scene... 💙",
+    "Miku's character development is a masterpiece 📈",
+    "When Miku stood up for herself, I cheered! 🙌",
+    "The way Miku looks at Fuutarou... pure love 💙",
     "Just Miku being adorable as always! 💙",
     "Miku's smile brightens the darkest days! 🎧",
     "History buff Miku looking cute today! 📚",

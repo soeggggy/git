@@ -41,17 +41,20 @@ def status():
         "reddit_enabled": bool(os.getenv("REDDIT_CLIENT_ID") and os.getenv("REDDIT_CLIENT_SECRET"))
     })
     
-@app.route('/api/test/reddit-post', methods=['GET'])
-def test_reddit_post():
-    """API endpoint to manually test posting from Reddit"""
-    from api_clients import fetch_reddit_post, reddit_client
+@app.route('/api/test/post/<post_type>', methods=['GET'])
+def test_post(post_type):
+    """API endpoint to manually trigger different types of posts"""
+    from api_clients import fetch_reddit_post, get_random_miku_image, reddit_client
+    from facts import get_random_miku_fact, get_random_miku_caption
     from handlers import send_post
     from bot import get_bot
     
-    if not reddit_client:
+    # Validate post type
+    valid_types = ['fact', 'image', 'reddit']
+    if post_type not in valid_types:
         return jsonify({
             "success": False,
-            "message": "Reddit client not initialized. Please add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET environment variables."
+            "message": f"Invalid post type. Must be one of: {', '.join(valid_types)}"
         }), 400
     
     # Get the bot instance
@@ -69,24 +72,67 @@ def test_reddit_post():
     
     context = MockContext(bot)
     
-    # Fetch a Reddit post
-    reddit_post = fetch_reddit_post()
-    if not reddit_post:
-        return jsonify({
-            "success": False,
-            "message": "Could not fetch a Reddit post. Check logs for details."
-        }), 500
+    # Prepare content based on post type
+    content = None
+    
+    if post_type == 'fact':
+        # Post a fact with image
+        image_data = get_random_miku_image()
+        if not image_data:
+            return jsonify({
+                "success": False,
+                "message": "Could not fetch a Miku image. Check logs for details."
+            }), 500
+            
+        content = {
+            "image_url": image_data["image_url"],
+            "caption": get_random_miku_fact(),
+            "source": image_data.get("source", "")
+        }
+        
+    elif post_type == 'image':
+        # Post just an image with short caption
+        image_data = get_random_miku_image()
+        if not image_data:
+            return jsonify({
+                "success": False,
+                "message": "Could not fetch a Miku image. Check logs for details."
+            }), 500
+            
+        content = {
+            "image_url": image_data["image_url"],
+            "caption": get_random_miku_caption(),
+            "source": image_data.get("source", "")
+        }
+        
+    elif post_type == 'reddit':
+        # Post from Reddit
+        if not reddit_client:
+            return jsonify({
+                "success": False,
+                "message": "Reddit client not initialized. Please add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET environment variables."
+            }), 400
+            
+        reddit_post = fetch_reddit_post()
+        if not reddit_post:
+            return jsonify({
+                "success": False,
+                "message": "Could not fetch a Reddit post. Check logs for details."
+            }), 500
+            
+        content = reddit_post
         
     # Try to send the post
     try:
-        send_post(context, reddit_post)
+        send_post(context, content)
         return jsonify({
             "success": True,
-            "message": "Reddit post fetched and sent successfully!",
+            "message": f"{post_type.capitalize()} post sent successfully!",
             "post": {
-                "image_url": reddit_post.get("image_url", ""),
-                "source": reddit_post.get("source", ""),
-                "caption_length": len(reddit_post.get("caption", ""))
+                "type": post_type,
+                "image_url": content.get("image_url", ""),
+                "source": content.get("source", ""),
+                "caption_preview": content.get("caption", "")[:30] + "..." if len(content.get("caption", "")) > 30 else content.get("caption", "")
             }
         })
     except Exception as e:
@@ -94,6 +140,12 @@ def test_reddit_post():
             "success": False,
             "message": f"Error sending post: {str(e)}"
         }), 500
+
+# Keeping the original endpoint for backward compatibility
+@app.route('/api/test/reddit-post', methods=['GET'])
+def test_reddit_post():
+    """Redirect to the new endpoint structure for Reddit posts"""
+    return test_post('reddit')
 
 def run_bot():
     """Run the Telegram bot in a separate thread"""

@@ -120,6 +120,19 @@
         </div>
         
         <div class="miku-card">
+            <h2>Manual Posting Controls</h2>
+            <p>Use these buttons to manually trigger different types of posts:</p>
+            <div class="manual-controls">
+                <button id="post-fact-btn" class="btn btn-primary">Post Miku Fact</button>
+                <button id="post-image-btn" class="btn btn-info">Post Miku Image</button>
+                <button id="post-reddit-btn" class="btn btn-warning">Post Reddit Content</button>
+            </div>
+            <div id="post-result" class="mt-3" style="display: none;">
+                <div class="alert" role="alert"></div>
+            </div>
+        </div>
+        
+        <div class="miku-card">
             <h2>Troubleshooting</h2>
             <div class="info-item">
                 <h4>Bot Can't Post to Channel</h4>
@@ -215,6 +228,63 @@
         // Check status immediately and then every 10 seconds
         checkStatus();
         setInterval(checkStatus, 10000);
+        
+        // Manual posting buttons
+        document.getElementById('post-fact-btn').addEventListener('click', function() {
+            triggerPost('fact');
+        });
+        
+        document.getElementById('post-image-btn').addEventListener('click', function() {
+            triggerPost('image');
+        });
+        
+        document.getElementById('post-reddit-btn').addEventListener('click', function() {
+            triggerPost('reddit');
+        });
+        
+        // Function to trigger manual posts
+        function triggerPost(type) {
+            // Disable all buttons
+            document.querySelectorAll('.manual-controls button').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Show loading state
+            const resultDiv = document.getElementById('post-result');
+            const alertDiv = resultDiv.querySelector('.alert');
+            resultDiv.style.display = 'block';
+            alertDiv.className = 'alert alert-info';
+            alertDiv.textContent = `Sending ${type} post... Please wait.`;
+            
+            // Fetch the API
+            fetch(`/api/test/post/${type}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alertDiv.className = 'alert alert-success';
+                        alertDiv.innerHTML = `<strong>Success!</strong> ${data.message}<br>
+                            <small>Caption: ${data.post.caption_preview || 'N/A'}</small>`;
+                    } else {
+                        alertDiv.className = 'alert alert-danger';
+                        alertDiv.innerHTML = `<strong>Error:</strong> ${data.message}`;
+                    }
+                })
+                .catch(error => {
+                    alertDiv.className = 'alert alert-danger';
+                    alertDiv.textContent = `Error: ${error.message || 'Unknown error occurred'}`;
+                })
+                .finally(() => {
+                    // Re-enable buttons
+                    document.querySelectorAll('.manual-controls button').forEach(btn => {
+                        btn.disabled = false;
+                    });
+                    
+                    // Auto-hide the message after 10 seconds
+                    setTimeout(() => {
+                        resultDiv.style.display = 'none';
+                    }, 10000);
+                });
+        }
     </script>
 </body>
 </html>
