@@ -154,15 +154,21 @@ def run_bot():
 # Only start the bot when running directly, not when imported by gunicorn
 if __name__ == '__main__':
     import sys
+    import os
     
-    # Check if we're just running the bot without the web server
-    if len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
+    # Detect if we're running from the run_miku_bot workflow
+    # The workflow name is set in the environment by Replit
+    current_workflow = os.environ.get('REPL_WORKFLOW')
+    
+    # If we're explicitly asked to run bot_only OR we're in the run_miku_bot workflow
+    if (len(sys.argv) > 1 and sys.argv[1] == 'bot_only') or current_workflow == 'run_miku_bot':
         # Just run the bot without the web server (no Flask)
         print("Starting Miku bot in standalone mode...")
+        print(f"Running from workflow: {current_workflow}")
         
         # Import here to avoid circular imports
-        from bot_runner import run_standalone_bot
-        run_standalone_bot()
+        from start_bot import main as start_bot_main
+        start_bot_main()
     else:
         # Normal mode: start both the bot thread and Flask app
         # Start the bot in a separate thread
