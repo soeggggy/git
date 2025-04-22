@@ -19,14 +19,10 @@ def run_standalone_bot():
     initialize_reddit_client()
     
     # Create and configure the bot
-    from config import TELEGRAM_BOT_TOKEN
-    updater = Updater(TELEGRAM_BOT_TOKEN)
-    
-    # Set up scheduler for regular posts
-    setup_scheduler(updater)
+    from bot import setup_bot
     
     # Start the bot
-    updater.start_polling()
+    setup_bot()
     
     logging.info("Bot is running. Press Ctrl+C to stop.")
     

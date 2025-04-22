@@ -1,5 +1,8 @@
 import logging
-from telegram import Update
+import os
+import tempfile
+import requests
+from telegram import Update, InputFile
 from config import DEFAULT_CHANNEL
 import sys
 
@@ -42,13 +45,67 @@ def send_post(context, content: dict):
             return
             
         try:
-            # Send the image with caption
-            bot.send_photo(
-                chat_id=channel,
-                photo=content['image_url'],
-                caption=full_caption
-            )
-            logger.info(f"Successfully posted content to {channel}: {content['image_url'][:30]}...")
+            # First download the image to a temporary file
+            image_url = content['image_url']
+            logger.info(f"Downloading image from: {image_url[:50]}...")
+            
+            # Create a temporary file
+            temp_file = None
+            try:
+                # Download the image
+                response = requests.get(image_url, stream=True, timeout=10)
+                response.raise_for_status()  # Raise error for bad status codes
+                
+                # Get file extension from content type if possible
+                content_type = response.headers.get('content-type', '')
+                extension = '.jpg'  # Default extension
+                if 'png' in content_type:
+                    extension = '.png'
+                elif 'gif' in content_type:
+                    extension = '.gif'
+                elif 'jpeg' in content_type or 'jpg' in content_type:
+                    extension = '.jpg'
+                
+                # Create a temporary file with the appropriate extension
+                fd, temp_file = tempfile.mkstemp(suffix=extension)
+                os.close(fd)  # Close the file descriptor
+                
+                # Write the image data to the temporary file
+                with open(temp_file, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                
+                logger.info(f"Image downloaded successfully to: {temp_file}")
+                
+                # Send the image from the temporary file
+                with open(temp_file, 'rb') as photo_file:
+                    bot.send_photo(
+                        chat_id=channel,
+                        photo=InputFile(photo_file),
+                        caption=full_caption
+                    )
+                logger.info(f"Successfully posted content to {channel}")
+                
+            except requests.exceptions.RequestException as req_err:
+                logger.error(f"Error downloading image: {req_err}")
+                # Fall back to direct URL if download fails
+                logger.info("Falling back to direct URL...")
+                bot.send_photo(
+                    chat_id=channel,
+                    photo=image_url,
+                    caption=full_caption
+                )
+                logger.info(f"Successfully posted content using direct URL to {channel}")
+                
+            finally:
+                # Clean up the temporary file
+                if temp_file and os.path.exists(temp_file):
+                    try:
+                        os.remove(temp_file)
+                        logger.debug(f"Temporary file {temp_file} removed")
+                    except Exception as rm_err:
+                        logger.warning(f"Failed to remove temporary file: {rm_err}")
+                
         except Exception as e:
             if "Forbidden" in str(e) and "bot is not a member" in str(e):
                 logger.error(f"Error: Bot doesn't have permission to post to {channel}. "

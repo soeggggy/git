@@ -10,21 +10,34 @@ import time
 
 logger = logging.getLogger(__name__)
 
-# Initialize Reddit client if credentials are available
+# Global variable for Reddit client
 reddit_client = None
-if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET:
-    try:
-        reddit_client = praw.Reddit(
-            client_id=REDDIT_CLIENT_ID,
-            client_secret=REDDIT_CLIENT_SECRET,
-            user_agent=REDDIT_USER_AGENT
-        )
-        logger.info("Reddit client initialized")
-    except Exception as e:
-        logger.error(f"Error initializing Reddit client: {e}")
-        reddit_client = None
-else:
-    logger.warning("Reddit API credentials not found, Reddit features disabled")
+
+def initialize_reddit_client():
+    """Initialize and return the Reddit client if credentials are available"""
+    global reddit_client
+    
+    if reddit_client:
+        return reddit_client  # Already initialized
+        
+    if REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET:
+        try:
+            reddit_client = praw.Reddit(
+                client_id=REDDIT_CLIENT_ID,
+                client_secret=REDDIT_CLIENT_SECRET,
+                user_agent=REDDIT_USER_AGENT
+            )
+            logger.info("Reddit client initialized")
+            return reddit_client
+        except Exception as e:
+            logger.error(f"Error initializing Reddit client: {e}")
+            return None
+    else:
+        logger.warning("Reddit API credentials not found, Reddit features disabled")
+        return None
+
+# Initialize Reddit client on module import
+initialize_reddit_client()
 
 def fetch_image_from_waifu_pics():
     """
