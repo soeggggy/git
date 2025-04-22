@@ -153,10 +153,24 @@ def run_bot():
 
 # Only start the bot when running directly, not when imported by gunicorn
 if __name__ == '__main__':
-    # Start the bot in a separate thread
-    bot_thread = threading.Thread(target=run_bot)
-    bot_thread.daemon = True
-    bot_thread.start()
+    import sys
     
-    # Run the Flask app
-    app.run(host='0.0.0.0', port=5000)
+    # Check if we're just running the bot without the web server
+    if len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
+        # Just run the bot without the web server
+        print("Starting Miku bot in standalone mode...")
+        run_bot()
+        print("Bot is running. Press Ctrl+C to stop.")
+        
+        # Keep the script running
+        import time
+        while True:
+            time.sleep(1)
+    else:
+        # Start the bot in a separate thread
+        bot_thread = threading.Thread(target=run_bot)
+        bot_thread.daemon = True
+        bot_thread.start()
+        
+        # Run the Flask app
+        app.run(host='0.0.0.0', port=5000)
