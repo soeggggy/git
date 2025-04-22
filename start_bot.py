@@ -2,13 +2,12 @@
 A dedicated script to start only the bot without any web interface.
 This is called by the run_miku_bot workflow.
 """
+import sys
 import logging
-from bot import setup_bot
-from api_clients import initialize_reddit_client
 
-# Set up logging
+# Configure logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
     level=logging.INFO
 )
 
@@ -16,32 +15,14 @@ logger = logging.getLogger(__name__)
 
 def main():
     """Run the bot in standalone mode"""
-    logger.info("Starting Miku bot in dedicated standalone mode...")
+    print("==============================")
+    print("Miku Bot Startup Script")
+    print("==============================")
     
-    # Initialize Reddit client if credentials are available
-    initialize_reddit_client()
+    # Import and run the standalone bot directly
+    print("Starting bot in standalone mode...")
+    from standalone_bot import run_standalone
+    run_standalone()
     
-    # Start the bot
-    updater = setup_bot()
-    
-    logger.info("Bot is running in standalone mode. Press Ctrl+C to stop.")
-    
-    # Keep the script running
-    try:
-        # Use updater.idle() to properly handle signals
-        if updater:
-            updater.idle()
-        else:
-            # Fallback if updater wasn't properly initialized
-            import time
-            while True:
-                time.sleep(1)
-    except KeyboardInterrupt:
-        logger.info("Bot is shutting down...")
-        if updater:
-            updater.stop()
-    except Exception as e:
-        logger.error(f"Error in bot runner: {e}")
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
