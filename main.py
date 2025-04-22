@@ -161,12 +161,12 @@ def main():
     if current_workflow == 'run_miku_bot':
         print("=========================================")
         print("Detected run_miku_bot workflow")
-        print("Starting BOT with port conflict detection...")
+        print("Starting BOT in standalone mode...")
         print("=========================================")
         
-        # Import and run the special runner with port conflict detection
-        import run_bot
-        run_bot.run_standalone_bot()
+        # Import and run the bot in standalone mode without web interface
+        import standalone_bot
+        standalone_bot.run_standalone()
         return
     
     # If explicitly asked to run bot_only from command line arg

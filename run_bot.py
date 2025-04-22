@@ -26,16 +26,11 @@ def run_standalone_bot():
     """Run the bot in standalone mode, ensuring no port conflicts"""
     print("==== Miku Bot Special Runner ====")
     
-    # Check if port 5000 is in use
-    if is_port_in_use(5000):
-        print("Port 5000 is already in use. Running bot in standalone mode...")
-        # Import and run the standalone bot without using Flask
-        import standalone_bot
-        standalone_bot.run_standalone()
-    else:
-        print("Port 5000 is available. Starting web interface and bot...")
-        # Start the combined mode with web interface
-        os.system("python main.py")
+    # Always use standalone mode when running from the run_miku_bot workflow
+    # This ensures no port conflicts with the other workflow
+    print("Running bot in standalone mode without web interface...")
+    import standalone_bot
+    standalone_bot.run_standalone()
 
 if __name__ == "__main__":
     run_standalone_bot()
