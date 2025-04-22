@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 from bot import setup_bot
 from flask import Flask, render_template, jsonify
 import threading
@@ -151,37 +152,29 @@ def run_bot():
     """Run the Telegram bot in a separate thread"""
     setup_bot()
 
-# Only start the bot when running directly, not when imported by gunicorn
-if __name__ == '__main__':
-    import sys
-    import os
-    import time
-    
+# Handle the startup differently based on workflow
+def main():
     # Get the current workflow name from environment variable
     current_workflow = os.environ.get('REPL_WORKFLOW', '')
     
-    # Special handling for the run_miku_bot workflow
+    # Check if this is running in the run_miku_bot workflow
     if current_workflow == 'run_miku_bot':
-        print(f"=========================================")
-        print(f"Detected run_miku_bot workflow")
-        print(f"Starting BOT ONLY in standalone mode...")
-        print(f"=========================================")
+        print("=========================================")
+        print("Detected run_miku_bot workflow")
+        print("Starting BOT ONLY in standalone mode...")
+        print("=========================================")
         
-        # Import and run the standalone bot version
-        import bot_only
-        
-        # This script will now exit, as bot_only has its own main loop
-        sys.exit(0)
+        from bot_runner import run_standalone_bot
+        run_standalone_bot()
+        return
     
     # If explicitly asked to run bot_only from command line arg
     elif len(sys.argv) > 1 and sys.argv[1] == 'bot_only':
         print("Starting Miku bot in standalone mode via command line argument...")
         
-        # Import the dedicated bot script
-        import bot_only
-        
-        # This script will now exit, as bot_only has its own main loop
-        sys.exit(0)
+        from bot_runner import run_standalone_bot
+        run_standalone_bot()
+        return
     
     else:
         # Normal mode: start both the bot thread and Flask app
@@ -194,3 +187,7 @@ if __name__ == '__main__':
         
         # Run the Flask app
         app.run(host='0.0.0.0', port=5000)
+
+# Only start the bot when running directly, not when imported by gunicorn
+if __name__ == '__main__':
+    main()
