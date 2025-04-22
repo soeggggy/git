@@ -29,18 +29,20 @@ else:
 def fetch_image_from_waifu_pics():
     """
     Fetch an anime image from waifu.pics API.
-    Will only sometimes return Miku, but is a good fallback.
+    This is only used as a fallback since it's harder to get specific Miku images.
     
     Returns:
         dict: Contains image_url and source
     """
     try:
+        # Note: waifu.pics doesn't allow specific character searches,
+        # so this is only used as a last resort fallback
         response = requests.get(WAIFU_PICS_API)
         if response.status_code == 200:
             data = response.json()
             return {
                 "image_url": data.get("url"),
-                "source": "waifu.pics"
+                "source": "waifu.pics (Fallback - may not be Miku)"
             }
     except Exception as e:
         logger.error(f"Error fetching from waifu.pics: {e}")
@@ -48,18 +50,24 @@ def fetch_image_from_waifu_pics():
 
 def fetch_image_from_waifu_im():
     """
-    Fetch an anime image from waifu.im API with Miku tag if possible.
+    Fetch a Nakano Miku image from waifu.im API.
     
     Returns:
         dict: Contains image_url and source
     """
     try:
-        params = {"included_tags": "miku_nakano"}
+        # Make sure we're specifically requesting Nakano Miku
+        params = {
+            "included_tags": "miku_nakano",
+            "height": ">=1000",  # Better quality images
+            "many": "true"       # Get multiple results to choose from
+        }
         response = requests.get(ANIME_PICS_API, params=params)
         if response.status_code == 200:
             data = response.json()
             if 'images' in data and len(data['images']) > 0:
-                img = data['images'][0]
+                # Choose a random image from the results
+                img = random.choice(data['images'])
                 return {
                     "image_url": img.get("url"),
                     "source": f"waifu.im - {img.get('source', 'Unknown')}"
@@ -95,7 +103,7 @@ def fetch_image_from_safebooru():
 
 def fetch_reddit_post():
     """
-    Fetch a Miku-related post from Reddit.
+    Fetch a Nakano Miku-related post from Reddit.
     
     Returns:
         dict: Contains image_url, caption, and source
@@ -112,15 +120,33 @@ def fetch_reddit_post():
         # Get hot posts from the subreddit
         posts = list(subreddit.hot(limit=50))
         
-        # Filter for image posts
-        image_posts = [
-            post for post in posts 
-            if (hasattr(post, 'url') and
-                any(post.url.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif']))
-        ]
+        # Only get image posts that are related to Miku
+        image_posts = []
+        for post in posts:
+            # Check if this is an image post
+            is_image = (hasattr(post, 'url') and
+                      any(post.url.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif']))
+            
+            # Check if it's specifically about Miku
+            has_miku_reference = False
+            if hasattr(post, 'title'):
+                title_lower = post.title.lower()
+                has_miku_reference = ('miku' in title_lower or 
+                                     'nakano' in title_lower or
+                                     'third sister' in title_lower or
+                                     'headphones' in title_lower)
+            
+            # For the MikuNakano and Nakano_Miku subreddits, all posts are about Miku
+            if subreddit_name in ['MikuNakano', 'Nakano_Miku', 'churchofmiku']:
+                has_miku_reference = True
+                
+            # Add to our list if it meets both criteria
+            if is_image and has_miku_reference:
+                image_posts.append(post)
         
+        # If no suitable posts found, try another subreddit
         if not image_posts:
-            logger.warning(f"No image posts found in r/{subreddit_name}")
+            logger.warning(f"No Miku image posts found in r/{subreddit_name}")
             return None
             
         # Pick a random image post
@@ -139,23 +165,37 @@ def fetch_reddit_post():
 def get_random_miku_image():
     """
     Try different sources to get a random Miku image.
+    Prioritizes Miku-specific sources.
     
     Returns:
         dict: Contains image_url and source
     """
-    # List of image fetcher functions to try in order
-    fetchers = [
-        fetch_image_from_waifu_im,  # Try specific Miku images first
-        fetch_image_from_safebooru,  # Then try safebooru
-        fetch_image_from_waifu_pics  # Fallback to general anime images
+    # We now use a more sophisticated selection approach
+    # that favors high-quality Miku-specific sources
+    
+    # Primary sources for Nakano Miku (These are the most reliable)
+    primary_fetchers = [
+        fetch_image_from_safebooru,  # Safebooru with nakano_miku tag
+        fetch_image_from_waifu_im,   # Waifu.im with miku_nakano tag
     ]
     
-    # Shuffle to add more randomness to source selection
-    random.shuffle(fetchers)
+    # Fallback source (less likely to be Miku, only used if all else fails)
+    fallback_fetchers = [
+        fetch_image_from_waifu_pics  # Generic anime images
+    ]
     
-    for fetcher in fetchers:
+    # Try the primary sources first (with randomization for variety)
+    random.shuffle(primary_fetchers)
+    for fetcher in primary_fetchers:
         result = fetcher()
         if result and 'image_url' in result:
+            return result
+    
+    # If primary sources fail, try fallbacks
+    for fetcher in fallback_fetchers:
+        result = fetcher()
+        if result and 'image_url' in result:
+            logger.warning("Using fallback image source - may not be Miku")
             return result
     
     # If all fetchers fail, return a default error response

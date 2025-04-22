@@ -40,6 +40,60 @@ def status():
         },
         "reddit_enabled": bool(os.getenv("REDDIT_CLIENT_ID") and os.getenv("REDDIT_CLIENT_SECRET"))
     })
+    
+@app.route('/api/test/reddit-post', methods=['GET'])
+def test_reddit_post():
+    """API endpoint to manually test posting from Reddit"""
+    from api_clients import fetch_reddit_post, reddit_client
+    from handlers import send_post
+    from bot import get_bot
+    
+    if not reddit_client:
+        return jsonify({
+            "success": False,
+            "message": "Reddit client not initialized. Please add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET environment variables."
+        }), 400
+    
+    # Get the bot instance
+    bot = get_bot()
+    if not bot:
+        return jsonify({
+            "success": False,
+            "message": "Bot not initialized yet. Try again in a few seconds."
+        }), 400
+    
+    # Create a minimal context with the bot
+    class MockContext:
+        def __init__(self, bot_instance):
+            self.bot = bot_instance
+    
+    context = MockContext(bot)
+    
+    # Fetch a Reddit post
+    reddit_post = fetch_reddit_post()
+    if not reddit_post:
+        return jsonify({
+            "success": False,
+            "message": "Could not fetch a Reddit post. Check logs for details."
+        }), 500
+        
+    # Try to send the post
+    try:
+        send_post(context, reddit_post)
+        return jsonify({
+            "success": True,
+            "message": "Reddit post fetched and sent successfully!",
+            "post": {
+                "image_url": reddit_post.get("image_url", ""),
+                "source": reddit_post.get("source", ""),
+                "caption_length": len(reddit_post.get("caption", ""))
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error sending post: {str(e)}"
+        }), 500
 
 def run_bot():
     """Run the Telegram bot in a separate thread"""

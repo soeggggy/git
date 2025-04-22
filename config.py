@@ -19,7 +19,8 @@ MIKU_SUBREDDITS = [
 # API endpoints for anime images
 WAIFU_PICS_API = "https://api.waifu.pics/sfw/waifu"
 ANIME_PICS_API = "https://api.waifu.im/search"
-SAFEBOORU_API = "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=nakano_miku"
+# Use specifically nakano_miku tag to only get Miku from Quintessential Quintuplets
+SAFEBOORU_API = "https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=nakano_miku+rating%3asafe"
 
 # Scheduling intervals (in seconds)
 # These can be customized via environment variables
