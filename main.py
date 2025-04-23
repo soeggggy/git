@@ -43,6 +43,38 @@ app = Flask(__name__)
 import time
 app.config['START_TIME'] = time.time()
 
+# Start the bot in a separate thread
+bot_thread = None
+updater = None
+
+def start_bot_thread():
+    """Run the Telegram bot in a separate thread"""
+    global bot_thread, updater
+    from bot import setup_bot
+    from scheduler import setup_scheduler
+    
+    # Initialize the bot
+    updater = setup_bot()
+    if not updater:
+        logging.error("Failed to initialize bot")
+        return False
+        
+    # Set up the scheduler
+    setup_scheduler(updater)
+    
+    # Start polling for updates
+    logging.info("Starting bot polling...")
+    updater.start_polling()
+    
+    logging.info("Bot polling started successfully")
+    return True
+
+# Start the bot
+import threading
+bot_thread = threading.Thread(target=start_bot_thread)
+bot_thread.daemon = True
+bot_thread.start()
+
 @app.route('/')
 def index():
     """Main page to show bot status"""
