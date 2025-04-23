@@ -1,0 +1,7 @@
+flask
+praw
+python-telegram-bot<12.0
+requests
+gunicorn
+APScheduler
+trafilatura

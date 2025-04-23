@@ -1,0 +1,36 @@
+# Git files
+.git
+.gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Replit specific
+.replit
+replit.nix
+.upm
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+.venv/
+env/
+
+# Logs
+*.log
+
+# Local development
+.vscode/
+.idea/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
